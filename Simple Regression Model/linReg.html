@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.6"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"> </script>
+    <title></title>
+  </head>
+  <body>
+    <div class="container">
+      X: <input type="number" name="X" id="xVal"><br>
+      Y: <input type="number" name="Y" id="yVal"><br>
+      <button type="button" name="append" id='butt'>Append!</button>
+    </div>
+
+
+      <canvas id="myChart" width="100" height="100"></canvas>
+  </body>
+
+  <script type="text/javascript">
+  var x = []
+  var y = []
+
+  document.getElementById('butt').addEventListener("click",function() {
+    var xVal = document.getElementById('xVal').value
+    var yVal = document.getElementById('yVal').value
+
+    x.push(xVal)
+    y.push(yVal)
+
+    // TensorFlow Model
+    const model = tf.sequential();
+    model.add(tf.layers.dense({units: 1, inputShape: [1]}))
+    model.add(tf.layers.dense({units: 1, inputShape: [1]}))
+    model.compile({loss: 'meanSquaredError', optimizer: 'sgd'})
+    model.fit(tf.tensor(x, [x.length,1]),tf.tensor(y, [y.length,1]),{epochs: 100})
+    var predictions = model.predict(tf.tensor(x, [x.length,1])).dataSync()
+
+    var ctx = document.getElementById("myChart");
+    var myLineChart = new Chart(ctx, {
+    type: 'line',
+    options: {scales:{yAxes: [{ticks: {beginAtZero: true}}]}},
+    data: {
+            labels: x,
+            datasets: [
+                    {
+                        label: 'Original Data',
+                        data: y,
+                        borderWidth: 1,
+                    },{
+                            label: 'Best Fit line',
+                            data: predictions,
+                            borderWidth: 1,
+                            borderColor: '#FF0000',
+                            backgroundColor: 'rgba(1,1,1,0)'
+                        },]
+                },
+});
+
+  })
+
+  </script>
+
+</html>
